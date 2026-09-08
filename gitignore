@@ -1,0 +1,69 @@
+# Arquivos do Sistema Operacional
+.DS_Store                    # macOS
+Thumbs.db                    # Windows
+*.swp                        # Vim
+*.swo                        # Vim
+*~                          # Backup files
+.vscode/                    # VS Code settings
+
+# Arquivos de IDE
+.idea/                      # IntelliJ
+*.sublime-project           # Sublime Text
+*.sublime-workspace         # Sublime Text
+.project                    # Eclipse
+.classpath                  # Eclipse
+
+# Pastas de Cache
+__pycache__/                # Python
+*.egg-info/                 # Python
+.pytest_cache/              # Python
+node_modules/               # Node.js
+.npm                        # NPM cache
+
+# Arquivos Temporários
+*.tmp
+*.temp
+*.log
+*.bak
+*.backup
+*.[0-9]~
+
+# Arquivos Pessoais (não sincronizar)
+/notas-privadas/            # Notas pessoais
+/rascunhos/                 # Rascunhos
+/questoes-em-aberto/        # Questões não resolvidas ainda
+
+# Arquivos de Trabalho Sensíveis
+/credenciais.txt            # Nunca commitir credenciais!
+/tokens.txt
+/.env                       # Variáveis de ambiente
+
+# Pastas de Download
+/downloads/
+/temp/
+
+# Arquivos do Office que podem estar corrompidos
+*.~lock*                    # LibreOffice lock files
+.~$*                        # Word lock files
+
+# Arquivos muito grandes
+*.iso
+*.dmg
+*.exe
+*.rar
+*.zip
+
+# Apenas para estudo local
+/estudos-locais/            # Pasta para experimentos
+/testes/                    # Testes pessoais
+
+---
+
+# ✅ COMENTÁRIOS ÚTEIS:
+# - Mantenha limpo: só adicione ao Git o que é estudo
+# - Não sincronize credenciais, tokens ou informações sensíveis
+# - Fotos de provas/pareceres: melhor em pasta local
+# - Arquivos Excel grandes: considere usar Google Sheets
+
+# Se precisar adicionar algo que está aqui:
+# git add -f arquivo.txt  (força adicionar)

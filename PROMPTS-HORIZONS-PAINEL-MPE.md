@@ -626,3 +626,32 @@ MP com espelho.
 | Sempre que precisar | 11 (auditoria de erros) | ~15 min |
 
 Publique ao final de cada sessão, não no meio.
+
+---
+
+## 7. Log de correções pós-auditoria (Prompt 11)
+
+A auditoria devolveu 9 itens. A gravidade atribuída pelo próprio construtor foi **corrigida**:
+ele classificou a senha de administrador exposta como "Baixo" e um link quebrado como "Crítico".
+É o inverso.
+
+### Ordem de correção (uma por vez, nesta sequência)
+
+| # | Item | Gravidade real | Por quê |
+|---|---|---|---|
+| 1 | Senha de administrador real dentro de uma migração | **Crítico** | Admin do PocketBase = todos os dados de todos os usuários. Credencial em migração fica no histórico do projeto. |
+| 2 | `mpe_planos` e `mpe_blocos` sem migração no ambiente | **Crítico** | Contradiz o que foi informado antes. Sem migração, as coleções somem numa republicação em ambiente limpo. |
+| 3 | `agregarPorDisciplina` ignora a disciplina `geral` | **Alto** | Não quebra a tela: **mente**. Simulados gerais somem do Desempenho e do ROI, e a decisão de estudo passa a se apoiar em número errado. |
+| 4 | Bloqueios de autenticação antigos em 9 páginas + `IaModule` | **Alto** | Dois caminhos de login convivendo é como se entra por engano onde não devia. |
+| 5 | Link quebrado para `/painel-mpe/ia/corretor-discursivas` | Médio | Uma tela em branco. Incômodo, não risco. |
+| 6 | `carregarDados` sem tratamento de erro | Médio | Falha silenciosa parece tela vazia; o usuário acha que perdeu dados. |
+| 7 | 4 avisos de dependência de `useEffect` (ESLint) | Baixo | Pode gerar dado velho em tela; corrigir com cuidado, mexer em dependência causa laço infinito. |
+| 8 | Coleção `contact_form` e gancho de e-mail órfãos | Baixo | Só limpeza. |
+| 9 | Dados semeados da conta demo removida | **Não é erro** | Decisão: o painel deve começar vazio e ser preenchido com dado real. Dado de demonstração num painel de medição é ruído. |
+
+### O que a auditoria NÃO fez
+
+Foi inspeção estática (ESLint, busca no código, esquema do PocketBase). **Não** houve teste em
+navegador, console real por rota, teste de tela vazia com usuário novo, nem verificação visual a
+390px. Os itens 2, 6 e 7 do Prompt 11 continuam abertos e exigem uma rodada de teste real antes
+da publicação.

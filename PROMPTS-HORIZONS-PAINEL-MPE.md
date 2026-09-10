@@ -30,10 +30,9 @@ Aí preciso de:
 1. **O projeto Horizons conectado a um repositório GitHub** (Horizons → menu ☰ → *GitHub / Exportar*)
    e o repositório liberado para esta sessão. Sem isso não alcanço o código do site.
 2. As credenciais **não** — nunca me envie senha, `service_role key` ou `.env`. Só o repositório.
-3. O texto completo das outras abas do artefato. Nas imagens só consigo ler a aba **Hoje** e os
-   indicadores (50% → 55%, Fase 1/5, horizonte 18–30m). O conteúdo de **Ciclo de estudos**,
-   **Semana 1 · bloco a bloco** e **Rotina** eu reconstruí a partir da lógica visível — está no
-   Anexo A e você revisa antes de publicar.
+3. O texto das abas do artefato que ainda não vi. Já tenho a aba **Hoje**, os indicadores
+   (50% → 55%, Fase 1/5, horizonte 18–30m) e a grade completa da aba **Ciclo de estudos**
+   (Anexo A). Falta o conteúdo das abas **Semana 1 · bloco a bloco** e **Rotina**.
 
 ### O que já sei do ambiente
 - Hostinger **Horizons** gera app **React + Vite + TailwindCSS + shadcn/ui**. O banco e a
@@ -214,6 +213,68 @@ Layout da página (tema escuro, conforme o contexto que passei):
    Os números grandes, serifados; os rótulos pequenos e espaçados.
 
 Por enquanto os valores dos indicadores podem ficar fixos no código. Só a estrutura visual.
+```
+
+---
+
+### PROMPT 2-A — Menu lateral + Ciclo de Estudos como primeira tela
+
+> Pedido do usuário: "Ciclo de Estudos" passa a ser o **primeiro item** do menu lateral e abre a
+> grade semanal completa.
+
+```
+Duas alterações no menu lateral, sem mexer em mais nada:
+
+1. Crie um novo item de menu chamado "Ciclo de Estudos", com ícone de calendário/grade, e coloque-o
+   como o PRIMEIRO item da seção PRINCIPAL, acima de "Centro de Comando". Rota: /ciclo-de-estudos.
+   Os demais itens (Centro de Comando, Meu Dia, Estudo Ativo, Desempenho, Biblioteca Jurídica,
+   Discursiva, Simulados) permanecem exatamente na ordem atual, logo abaixo.
+
+2. Crie a página /ciclo-de-estudos, protegida por login, com o conteúdo abaixo.
+
+CABEÇALHO
+- Linha pequena em letras espaçadas, cinza: "CICLO 1 · SEMANA 1 · SEIS DIAS DE SEIS BLOCOS"
+- Título grande serifado: "Ciclo de estudos"
+- Parágrafo de apoio: "Semana dedicada 100% ao Bloco 1 (núcleo duro), com a carga de cada
+  disciplina proporcional ao consolidado de 2.060 questões. Sábado reserva 3 blocos de conteúdo
+  mais a revisão dos erros e a peça discursiva. As disciplinas giram para nunca repetir no mesmo
+  dia — o cérebro faz força para resgatar a informação, mesclando matérias. Domingo é descanso e
+  planejamento, sem exceção."
+
+A GRADE SEMANAL — este é o coração da tela
+No computador: uma tabela de seis colunas, dentro de um cartão escuro com borda fina cinza.
+Cabeçalhos em letras maiúsculas espaçadas e pequenas, com a duração em uma segunda linha menor:
+DIA | LEI SECA (1h) | QUESTÕES (1h) | CADERNO (2h) | CADERNO (2h) | G7 / PÓS (2h)
+
+Linhas separadas por uma linha fina; o rótulo do dia ("1º DIA") em rosa #E8879B, em versalete.
+
+1º DIA | Constitucional | Penal | Tutela Difusos e Coletivos | Civil | Processo Penal
+2º DIA | Legislação Penal Especial | Processo Penal | Administrativo | Constitucional | Processo Civil
+3º DIA | Tutela Difusos e Coletivos | Civil | Processo Penal | Penal | Legislação Penal Especial
+4º DIA | Penal | Constitucional | Civil | Tutela Difusos e Coletivos | Administrativo
+5º DIA | Processo Penal | Tutela Difusos e Coletivos | Penal | Constitucional | Processo Civil
+6º DIA | Constitucional | Revisão dos erros | Tutela Difusos e Coletivos | Legislação Penal Especial | Jurisprudência + discursiva
+7º DIA | em itálico, cinza, ocupando a largura toda: "Descanso — reler os cadernos, anotar o que travou e pedir o plano da semana 2"
+
+No CELULAR não use tabela com rolagem lateral: transforme cada dia em um cartão empilhado, com o
+rótulo do dia no topo em rosa e, dentro, cinco linhas no formato "LEI SECA · 1h — Constitucional",
+uma embaixo da outra. O 7º dia vira um cartão só com a frase de descanso.
+
+Destaque o cartão (ou a linha) do dia de hoje com borda rosa à esquerda, calculando pela data real:
+segunda = 1º dia, ..., sábado = 6º dia, domingo = 7º dia.
+
+CARGA DA SEMANA — abaixo da grade, uma grade de indicadores pequenos, dois por linha no celular:
+Tutela Difusos e Coletivos 8h · Constitucional 7h · Processo Penal 6h · Penal 6h ·
+Legislação Penal Especial 5h · Civil 5h · Processo Civil 4h · Administrativo 4h ·
+Revisão e discursiva 3h.
+Acima deles, o rótulo "HORAS POR DISCIPLINA NA SEMANA · TOTAL 48H".
+
+NOTA DE RODAPÉ, em texto menor e cinza:
+"As 3h de Infância e Juventude foram redistribuídas dentro do Bloco 1 (1h para Tutela Coletiva, 1h
+para Constitucional, 1h devolvida a Civil), porque o Bloco 1 foi definido sem ela."
+
+Por enquanto os dados da grade podem ficar fixos no código, em um único arquivo de dados separado
+do componente visual, para eu poder trocar a semana depois sem mexer no layout.
 ```
 
 ---
@@ -408,13 +469,53 @@ Depois disso, liste para mim tudo que mudou e me diga o que devo testar antes de
 
 ---
 
-## 4. Anexo A — Conteúdo da Semana 1, bloco a bloco
+## 4. Anexo A — A grade da Semana 1 (fonte: o artefato)
 
-> **Segunda-feira** é exatamente o que está no artefato original.
-> **Terça a sábado** foram construídos por mim seguindo a mesma lógica — revise e ajuste ao seu
-> edital antes de carregar.
+> Esta grade foi lida diretamente do artefato, aba **Ciclo de estudos**. Substitui integralmente a
+> versão anterior deste anexo, que era uma reconstrução minha e **estava errada** na rotação das
+> disciplinas.
 
-### SEGUNDA-FEIRA · PRIMEIRO DIA (8h)
+**Lógica da semana**, no texto do próprio artefato: semana dedicada 100% ao Bloco 1 (núcleo duro),
+com a carga de cada disciplina proporcional ao consolidado de 2.060 questões. Sábado reserva 3
+blocos de conteúdo mais a revisão dos erros e a peça discursiva. As disciplinas giram para nunca
+repetir no mesmo dia — o cérebro faz força para resgatar a informação, mesclando matérias. Domingo
+é descanso e planejamento, sem exceção.
+
+### A grade
+
+| DIA | LEI SECA · 1h | QUESTÕES · 1h | CADERNO · 2h | CADERNO · 2h | G7/PÓS · 2h |
+|---|---|---|---|---|---|
+| **1º DIA** | Constitucional | Penal | Tutela Difusos e Coletivos | Civil | Processo Penal |
+| **2º DIA** | Legislação Penal Especial | Processo Penal | Administrativo | Constitucional | Processo Civil |
+| **3º DIA** | Tutela Difusos e Coletivos | Civil | Processo Penal | Penal | Legislação Penal Especial |
+| **4º DIA** | Penal | Constitucional | Civil | Tutela Difusos e Coletivos | Administrativo |
+| **5º DIA** | Processo Penal | Tutela Difusos e Coletivos | Penal | Constitucional | Processo Civil |
+| **6º DIA** | Constitucional | Revisão dos erros | Tutela Difusos e Coletivos | Legislação Penal Especial | Jurisprudência + discursiva |
+| **7º DIA** | *Descanso — reler os cadernos, anotar o que travou e pedir o plano da semana 2* | | | | |
+
+8h por dia · 48h na semana.
+
+### Horas por disciplina na semana
+
+| Disciplina | Horas |
+|---|---|
+| Tutela Difusos e Coletivos | 8h |
+| Constitucional | 7h |
+| Processo Penal | 6h |
+| Penal | 6h |
+| Legislação Penal Especial | 5h |
+| Civil | 5h |
+| Processo Civil | 4h |
+| Administrativo | 4h |
+| Revisão dos erros + jurisprudência e discursiva | 3h |
+
+*As 3h de Infância e Juventude foram redistribuídas dentro do Bloco 1 (1h para Tutela Coletiva,
+1h para Constitucional, 1h devolvida a Civil), porque o Bloco 1 foi definido sem ela.*
+
+Confere: 8+7+6+6+5+5+4+4+3 = 48h.
+
+### Detalhamento do 1º dia (do artefato, aba "Hoje")
+
 | Ordem | Duração | Tipo | Conteúdo |
 |---|---|---|---|
 | 1 | 1h | Lei seca | CF, arts. 127 a 130-A: o Ministério Público. Leitura limpa, grifo só no artigo-chave. É o tema de maior retorno do plano inteiro. |
@@ -423,54 +524,34 @@ Depois disso, liste para mim tudo que mudou e me diga o que devo testar antes de
 | 4 | 2h | Caderno | Civil: abrir a estrutura e fechar a parte geral (LINDB, pessoa natural, personalidade, capacidade). |
 | 5 | 2h | G7/Pós | Processo Penal: sistema acusatório, inquérito e ação penal. Anotar as três dúvidas que sobrarem. |
 
-### TERÇA-FEIRA · SEGUNDO DIA (8h)
-| Ordem | Duração | Tipo | Conteúdo |
-|---|---|---|---|
-| 1 | 1h | Lei seca | Lei 7.347/85 (LACP), arts. 1º a 5º e 11 a 13. É a espinha dorsal da atuação coletiva. |
-| 2 | 1h | Questões | 20 a 30 de Constitucional, funções institucionais do MP, bancas de MP. Fechar o ciclo com a lei seca de ontem. |
-| 3 | 2h | Caderno | Tutela Coletiva: legitimidade ativa, litispendência e conexão nas ações coletivas. |
-| 4 | 2h | Caderno | Civil: negócio jurídico — planos de existência, validade e eficácia; defeitos e invalidade. |
-| 5 | 2h | G7/Pós | Penal: teoria do crime — conduta, tipicidade, nexo causal e imputação objetiva. Três dúvidas. |
+### Temas sugeridos para os dias 2 a 6
 
-### QUARTA-FEIRA · TERCEIRO DIA (8h)
-| Ordem | Duração | Tipo | Conteúdo |
-|---|---|---|---|
-| 1 | 1h | Lei seca | CPP, arts. 4º a 23 (inquérito) e 24 a 42 (ação penal). Grifar prazos e titularidade. |
-| 2 | 1h | Questões | 20 a 30 de Tutela Coletiva, bancas de MP. Primeira medição da matéria-eixo da Fase 1. |
-| 3 | 2h | Caderno | Constitucional: controle de constitucionalidade — estrutura geral, ADI, ADC, ADPF e legitimados. |
-| 4 | 2h | Caderno | Administrativo: princípios expressos e implícitos; atos administrativos (atributos e elementos). |
-| 5 | 2h | G7/Pós | Civil: LINDB aplicada e prescrição e decadência. Três dúvidas. |
+> A **disciplina** de cada bloco é a da grade acima e não se mexe. O **tema** abaixo é sugestão
+> minha, coerente com a Fase 1 — ajuste ao seu edital.
 
-### QUINTA-FEIRA · QUARTO DIA (8h)
-| Ordem | Duração | Tipo | Conteúdo |
-|---|---|---|---|
-| 1 | 1h | Lei seca | CDC, arts. 1º a 7º, 12 a 17 e 81 a 104. A parte processual coletiva do CDC é a mais cobrada. |
-| 2 | 1h | Questões | 20 a 30 de Processo Penal, inquérito e ação penal. Fechar com a lei seca de ontem. |
-| 3 | 2h | Caderno | Inquérito civil e compromisso de ajustamento de conduta: Resolução 23 do CNMP, prazos e arquivamento. |
-| 4 | 2h | Caderno | Penal: culpabilidade, erro de tipo e de proibição, concurso de pessoas. |
-| 5 | 2h | G7/Pós | Constitucional: controle concentrado — efeitos da decisão, modulação e reclamação. Três dúvidas. |
+**2º DIA** — Lei seca: Lei 11.343/06, arts. 28, 33 a 35 e 40 · Questões: Processo Penal, inquérito
+e ação penal · Caderno: Administrativo, princípios e atos administrativos · Caderno:
+Constitucional, funções institucionais do MP e garantias · G7/Pós: Processo Civil, tutela
+provisória e competência.
 
-### SEXTA-FEIRA · QUINTO DIA (8h)
-| Ordem | Duração | Tipo | Conteúdo |
-|---|---|---|---|
-| 1 | 1h | Lei seca | Lei 8.429/92 com a redação da Lei 14.230/21: arts. 9º, 10, 11, 12, 17 e 17-B. Atenção ao dolo específico. |
-| 2 | 1h | Questões | 20 a 30 de Administrativo e Improbidade, bancas de MP. |
-| 3 | 2h | Caderno | Ambiental: princípios, competências, licenciamento e responsabilidade civil ambiental (Súmula 613 do STJ). |
-| 4 | 2h | Caderno | Infância e Juventude: medidas protetivas, medidas socioeducativas e a atuação do MP no ECA. |
-| 5 | 2h | G7/Pós | Tutela Coletiva: liquidação, execução e coisa julgada (art. 16 da LACP e Tema 1075 do STF). Três dúvidas. |
+**3º DIA** — Lei seca: Lei 7.347/85 (LACP), arts. 1º a 5º e 11 a 13 · Questões: Civil, parte geral
+· Caderno: Processo Penal, prisões e medidas cautelares · Caderno: Penal, teoria do crime
+(conduta, tipicidade, nexo) · G7/Pós: Legislação Penal Especial, Lei de Drogas e Lei de Tortura.
 
-### SÁBADO · SEXTO DIA (8h) — Aferição
-| Ordem | Duração | Tipo | Conteúdo |
-|---|---|---|---|
-| 1 | 2h | Simulado | 60 questões multibanca, cronometradas, misturando as cinco disciplinas da semana. |
-| 2 | 1h | Revisão | Correção do simulado sem consultar material: por que a errada está errada. |
-| 3 | 2h | Revisão | Caderno de erros da semana inteira: reescrever cada erro como uma frase de tese correta. |
-| 4 | 1h | Lei seca | Releitura rápida dos cinco textos legais da semana, só nos artigos grifados. |
-| 5 | 2h | G7/Pós | Uma peça ou discursiva de MP com espelho de correção. Comparar e anotar o que faltou. |
+**4º DIA** — Lei seca: CP, arts. 13 a 25 · Questões: Constitucional, MP e direitos fundamentais ·
+Caderno: Civil, negócio jurídico (existência, validade, eficácia) · Caderno: Tutela Coletiva,
+inquérito civil e TAC (Resolução 23 do CNMP) · G7/Pós: Administrativo, improbidade (Lei 8.429 com
+a redação da Lei 14.230/21).
 
-### DOMINGO — Descanso
-Sem blocos. No máximo, 30 minutos de releitura passiva do caderno de erros, se der vontade.
-Se não der, não faça.
+**5º DIA** — Lei seca: CPP, arts. 4º a 23 · Questões: Tutela Difusos e Coletivos · Caderno: Penal,
+culpabilidade e concurso de pessoas · Caderno: Constitucional, controle de constitucionalidade ·
+G7/Pós: Processo Civil, aplicação subsidiária ao processo coletivo.
+
+**6º DIA** — Lei seca: releitura dos artigos grifados na semana · Questões: revisão dos erros da
+semana, reescrevendo cada erro como tese correta · Caderno: Tutela Coletiva, liquidação, execução
+e coisa julgada (art. 16 da LACP e Tema 1075 do STF) · Caderno: Legislação Penal Especial, Lei
+8.072/90 e Lei 9.455/97 · G7/Pós: jurisprudência recente de STF e STJ + uma peça ou discursiva de
+MP com espelho.
 
 ---
 

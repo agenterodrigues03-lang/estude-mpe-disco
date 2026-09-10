@@ -655,3 +655,41 @@ Foi inspeção estática (ESLint, busca no código, esquema do PocketBase). **N�
 navegador, console real por rota, teste de tela vazia com usuário novo, nem verificação visual a
 390px. Os itens 2, 6 e 7 do Prompt 11 continuam abertos e exigem uma rodada de teste real antes
 da publicação.
+
+### Ajuste: o painel é de usuário único
+
+O usuário confirmou que **só ele** acessa o site, que foi feito exclusivamente para ele.
+Isso muda três itens — e não muda os dois primeiros.
+
+**O que muda**
+
+- O item 9 (dados da conta demo) fica decidido: painel começa vazio, sem semear nada.
+- O risco de "um usuário ver dados de outro" deixa de ser cenário real. As API rules por dono
+  continuam corretas e ficam como estão, mas saem da lista de prioridades.
+- Surge um item novo, que a auditoria não levantou: se existe opção **"Criar conta"** aberta na
+  tela de login, o painel não é exclusivo — qualquer pessoa que chegue ao endereço pode se
+  cadastrar. Fechar o cadastro público passa a ser gravidade **Alta**, e resolve junto com o
+  item 4 (bloqueios de autenticação antigos).
+
+**O que não muda**
+
+- Item 1 (senha de admin em migração) continua **Crítico**. Usuário único descreve quem
+  *deveria* entrar, não quem *consegue*. O site está na internet aberta, o endereço do painel
+  de administração do PocketBase é previsível, e uma credencial que vazou para um arquivo
+  publicado serve para qualquer pessoa que a encontre. Intenção não é controle de acesso.
+- Item 2 (coleções sem migração) continua **Crítico** e fica até pior: com um único usuário,
+  os dados perdidos numa republicação são exatamente os dele, sem nenhuma outra cópia.
+- Item 3 (`agregarPorDisciplina` ignorando `geral`) continua o mais insidioso: o número errado
+  é o dele, e é sobre ele que a decisão de estudo será tomada.
+
+### Ordem revisada
+
+1. Senha de admin em migração (**Crítico**) — e trocar a senha depois, fora do chat.
+2. `mpe_planos` e `mpe_blocos` sem migração (**Crítico**).
+3. Fechar o cadastro público de novas contas (**Alto** — item novo).
+4. `agregarPorDisciplina` ignora `geral` (**Alto**).
+5. Bloqueios de autenticação antigos em 9 páginas + `IaModule` (**Alto**).
+6. Link quebrado do corretor de discursivas (Médio).
+7. `carregarDados` sem tratamento de erro (Médio).
+8. Avisos de `useEffect` (Baixo).
+9. `contact_form` órfã (Baixo).

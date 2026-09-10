@@ -771,3 +771,24 @@ No portal do Azure (`portal.azure.com`), com a conta Microsoft do OneDrive:
 **Depois** de fechar os itens 1 a 5 da auditoria — em especial o item 5 (bloqueios de autenticação
 antigos). Construir uma integração de autenticação nova em cima de dois caminhos de login
 convivendo é a receita para um defeito que ninguém acha depois.
+
+**Item 2 — coleções sem migração: RESOLVIDO.**
+- As quatro coleções `mpe_` não tinham migração. Foram criadas:
+  `1789076843_create_mpe_planos.js`, `1789076844_create_mpe_blocos.js`,
+  `1789076845_create_mpe_sessoes_questoes.js`, `1789076846_create_mpe_caderno_erros.js`.
+- Todas idempotentes, sem apagar coleção ou registro e sem semear dados.
+- Nenhum registro foi perdido: as quatro estavam com 0 registros.
+
+**Descoberta operacional mais importante até aqui:**
+**visualização e publicação usam bancos de dados SEPARADOS.** O que é digitado na
+pré-visualização do Horizons não vai para o site publicado. As migrações rodam na inicialização
+do ambiente publicado e criam as coleções vazias lá.
+
+> **Regra permanente: dado real de estudo só se lança no site PUBLICADO.**
+> A pré-visualização é para testar a tela, nunca para registrar questões, erros ou blocos
+> concluídos. O que for digitado lá se perde.
+
+**Contradição a observar:** na criação das coleções, o construtor afirmou tê-las criado e
+informou que o projeto passara a ter 12 coleções. O diagnóstico do item 2 mostrou que não havia
+migração nenhuma. Nada se perdeu porque não havia dados — mas serve de lembrete: confirmar o que
+o construtor afirma ter feito, sempre.

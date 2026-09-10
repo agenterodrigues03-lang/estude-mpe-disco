@@ -13,10 +13,13 @@
 Não preciso de nada. Os prompts abaixo estão prontos para copiar e colar, **um de cada vez**,
 no chat do Horizons.
 
-Só confirme dois pontos antes de começar, porque mudam o Prompt 5:
+Situação confirmada com o usuário:
 
-- [ ] O login que aparece na tela ("Entrar / Criar agora") já está **funcionando** com Supabase?
-- [ ] Já existe alguma tabela criada no Supabase do projeto (ex.: `profiles`)?
+- [x] O login ("Entrar / Criar agora") **já está funcionando**.
+- [x] O projeto **já tem tabelas** no Supabase (quais, ainda não sabemos).
+
+Por isso, todas as tabelas novas usam o prefixo `mpe_`: elimina qualquer risco de colisão de nome
+com o que já existe, sem precisar auditar o banco antes.
 
 ### Caminho B — eu mesmo escrevo o código
 Aí preciso de:
@@ -82,10 +85,16 @@ Não altere nada ainda. Apenas confirme que entendeu e me diga o que já existe 
 ### PROMPT 1 — Estrutura de dados (Supabase)
 
 ```
+IMPORTANTE — leia antes de executar:
+- NÃO altere, renomeie nem apague nenhuma tabela, coluna ou política que já exista no projeto.
+- O login já funciona: use a autenticação existente, não crie outra.
+- Crie apenas tabelas NOVAS, todas com o prefixo mpe_, usando CREATE TABLE IF NOT EXISTS.
+- Se alguma dessas tabelas já existir, pare e me avise em vez de alterar.
+
 Crie no Supabase as tabelas abaixo, com RLS (Row Level Security) ativada e políticas que permitam
 a cada usuário ler e escrever APENAS as próprias linhas (comparando user_id com auth.uid()).
 
-1) planos
+1) mpe_planos
    - id (uuid, pk)
    - user_id (uuid, referência a auth.users)
    - titulo (text)
@@ -99,10 +108,10 @@ a cada usuário ler e escrever APENAS as próprias linhas (comparando user_id co
    - horizonte (text, default '18-30m')
    - created_at (timestamptz, default now())
 
-2) blocos
+2) mpe_blocos
    - id (uuid, pk)
    - user_id (uuid)
-   - plano_id (uuid, referência a planos)
+   - plano_id (uuid, referência a mpe_planos)
    - ciclo (int), semana (int)
    - dia_semana (int)          -- 1 = segunda ... 6 = sábado
    - ordem (int)               -- posição do bloco dentro do dia
@@ -113,7 +122,7 @@ a cada usuário ler e escrever APENAS as próprias linhas (comparando user_id co
    - concluido (boolean, default false)
    - concluido_em (timestamptz, null)
 
-3) sessoes_questoes
+3) mpe_sessoes_questoes
    - id (uuid, pk)
    - user_id (uuid)
    - data (date)
@@ -123,7 +132,7 @@ a cada usuário ler e escrever APENAS as próprias linhas (comparando user_id co
    - acertos (int)
    - observacoes (text)
 
-4) caderno_erros
+4) mpe_caderno_erros
    - id (uuid, pk)
    - user_id (uuid)
    - data (date, default hoje)
@@ -199,7 +208,7 @@ levemente arredondados, contendo:
   "A semana inteira, bloco a bloco, está na aba Semana 1 · bloco a bloco." (com "Semana 1 ·
   bloco a bloco" em negrito).
 
-Os blocos devem vir da tabela "blocos" do Supabase, filtrando pelo ciclo e semana atuais do
+Os blocos devem vir da tabela "mpe_blocos" do Supabase, filtrando pelo ciclo e semana atuais do
 plano do usuário e pelo dia da semana de hoje, ordenados pelo campo "ordem".
 Se não houver blocos cadastrados para hoje, mostre uma mensagem discreta:
 "Nenhum bloco cadastrado para hoje. Cadastre a semana na aba Semana 1 · bloco a bloco."
@@ -214,7 +223,7 @@ Se não houver blocos cadastrados para hoje, mostre uma mensagem discreta:
 > lógica (lei seca → questões → dois cadernos → G7/Pós), com o peso que MP costuma cobrar.
 
 ```
-Crie uma rotina de carga inicial (seed) que insira na tabela "blocos" os blocos do Ciclo 1,
+Crie uma rotina de carga inicial (seed) que insira na tabela "mpe_blocos" os blocos do Ciclo 1,
 Semana 1, para o usuário logado — e que não duplique se já existirem blocos daquela semana.
 
 Cole aqui o conteúdo do Anexo A (os seis dias, bloco a bloco).
@@ -326,7 +335,7 @@ Preencha a aba "Caderno de erros".
 3) No topo, três contadores: total de erros registrados, erros nunca revisados e a disciplina
    com mais erros no período — esta última com o rótulo "Sua maior fraqueza agora".
 
-Tudo gravado no Supabase, na tabela caderno_erros, apenas para o usuário logado.
+Tudo gravado no Supabase, na tabela mpe_caderno_erros, apenas para o usuário logado.
 ```
 
 ---
@@ -337,7 +346,7 @@ Tudo gravado no Supabase, na tabela caderno_erros, apenas para o usuário logado
 Agora torne o rodapé de indicadores dinâmico:
 
 - "NÍVEL ATUAL" deixa de ser fixo: passa a mostrar o percentual de acertos das últimas 10 sessões
-  registradas na tabela sessoes_questoes (soma de acertos dividida pela soma de total).
+  registradas na tabela mpe_sessoes_questoes (soma de acertos dividida pela soma de total).
   Se não houver nenhuma sessão registrada, mostre o nivel_inicial do plano (50%) e mantenha a
   legenda "diagnóstico inicial"; havendo sessões, a legenda passa a ser "últimas 10 sessões".
 - "META DO CICLO", "FASE" e "HORIZONTE" vêm dos campos do plano no banco.

@@ -792,3 +792,28 @@ do ambiente publicado e criam as coleções vazias lá.
 informou que o projeto passara a ter 12 coleções. O diagnóstico do item 2 mostrou que não havia
 migração nenhuma. Nada se perdeu porque não havia dados — mas serve de lembrete: confirmar o que
 o construtor afirma ter feito, sempre.
+
+**Item 3 — cadastro público: RESOLVIDO, com ressalva.**
+- A `createRule` da coleção de usuários já era `null` antes: o cadastro nunca esteve aberto no
+  banco. O link "Criar agora" era uma porta pintada na parede. A classificação "Alto" que dei ao
+  item foi conservadora demais.
+- Link removido, formulários de cadastro retirados de 10 telas, conta de demonstração
+  inexistente. 41 ações, nenhuma testada de verdade.
+
+**BLOQUEADOR ABERTO — recuperação de senha não funciona.**
+O construtor afirmou que não havia "sucesso silencioso" e que o retransmissor da Hostinger
+encaminhava as mensagens. **Teste real: o e-mail não chegou.** A afirmação dele era falsa.
+
+Situação atual do acesso:
+- Cadastro público fechado.
+- Recuperação por e-mail inoperante.
+- Painel de administração do PocketBase sem URL confirmada.
+
+> Isto é uma porta que tranca por fora. **Prioridade máxima**, acima de qualquer defeito de tela.
+
+O que realmente resolve não é o e-mail: é **acesso confirmado ao painel de administração do
+PocketBase**. Com ele, dá para redefinir a senha manualmente a qualquer momento e configurar o
+SMTP direito. O e-mail vira conveniência, não salva-vidas.
+
+Medida imediata, sem depender de ninguém: guardar a senha em um gerenciador de senhas e **não
+sair da sessão** do site publicado até a recuperação funcionar.

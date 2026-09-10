@@ -469,6 +469,53 @@ Depois disso, liste para mim tudo que mudou e me diga o que devo testar antes de
 
 ---
 
+### PROMPT 11 — Auditoria: listar todos os erros do projeto
+
+> Use sempre que sentir que "tem coisa quebrada" e antes de qualquer publicação importante.
+> A instrução de **não corrigir nada** é a parte mais importante do prompt: um construtor de IA
+> solto para "arrumar os erros" costuma quebrar três telas para consertar uma.
+
+```
+Não altere NENHUM arquivo agora. Esta tarefa é apenas de diagnóstico.
+
+Faça uma auditoria completa do projeto e me devolva a lista de TODOS os erros e riscos
+encontrados, em uma tabela com estas colunas:
+
+GRAVIDADE (Crítico / Alto / Médio / Baixo) | ONDE (arquivo, tela ou coleção) | O QUE ACONTECE |
+O QUE QUEBRA PARA O USUÁRIO | CORREÇÃO PROPOSTA (uma linha)
+
+Verifique, no mínimo:
+
+1. Erros de compilação e de build, e erros de tipo (TypeScript), com o arquivo e a linha.
+2. Erros e avisos que aparecem no console do navegador ao abrir CADA rota do app, uma por uma.
+   Liste as rotas que você testou.
+3. Itens do menu lateral que apontam para rota inexistente, página em branco ou tela que
+   não carrega.
+4. Chamadas ao PocketBase que falham (401, 403, 404), coleções referenciadas no código que não
+   existem no banco, e campos usados no código que não existem na coleção correspondente.
+5. Coleções cujas API rules permitem acesso a dados de outro usuário, ou que estão abertas
+   sem autenticação. Mostre a regra literal de cada uma que estiver irregular.
+6. Telas que quebram quando NÃO há dados: usuário novo, lista vazia, registro ausente.
+   Diga quais telas você testou nesse cenário.
+7. Layout: qualquer tela que estoure a largura em 390px e force rolagem lateral da página.
+8. Textos da interface em inglês ou fora do português do Brasil.
+9. Dependências quebradas, importações não resolvidas e arquivos órfãos que ninguém usa.
+10. Qualquer chave, token ou credencial exposta no código do lado do cliente.
+
+Ao final, separe em três listas:
+A) o que você pode corrigir sozinho, com segurança, sem afetar nenhuma outra tela;
+B) o que exige uma decisão minha antes;
+C) o que é apenas aviso cosmético e pode ficar como está.
+
+Ordene tudo da maior para a menor gravidade. Repito: não corrija nada ainda.
+```
+
+**Depois que ele responder:** corrija **um item por vez**, do mais grave para o menos grave,
+pedindo um checkpoint antes de cada correção que toque em mais de um arquivo. Nunca mande
+"corrija todos os itens da lista A" de uma vez.
+
+---
+
 ## 4. Anexo A — A grade da Semana 1 (fonte: o artefato)
 
 > Esta grade foi lida diretamente do artefato, aba **Ciclo de estudos**. Substitui integralmente a
@@ -576,5 +623,6 @@ MP com espelho.
 | 2ª | 3, 4, 5 | ~50 min |
 | 3ª | 6, 7 | ~30 min |
 | 4ª | 8, 9, 10 | ~50 min |
+| Sempre que precisar | 11 (auditoria de erros) | ~15 min |
 
 Publique ao final de cada sessão, não no meio.

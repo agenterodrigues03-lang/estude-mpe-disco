@@ -713,3 +713,61 @@ projeto não foi reportada. Cobrar antes de publicar.
 
 **Também sem resposta:** a conta de demonstração de `MPE_DEMO_PASSWORD` ainda existe e consegue
 fazer login? Entra junto com o item 3 (fechar o cadastro público).
+
+---
+
+## 8. Integração com o OneDrive (somente leitura)
+
+**Objetivo definido pelo usuário:** o painel lê os arquivos de uma pasta específica do OneDrive
+pessoal (`01-ESTUDOS PARA MPE-2026`) e os exibe dentro da Biblioteca Jurídica. Nada é gravado de
+volta. O trabalho de conteúdo continua no OneDrive e no ChatGPT; o painel passa a ser a vitrine e
+o medidor.
+
+### Por que isso não é "só um prompt"
+
+Ler o OneDrive de outra pessoa exige autorização da Microsoft. O caminho é:
+
+1. **Registro do aplicativo** no Microsoft Entra ID — só o usuário pode fazer, com a própria conta.
+2. **OAuth 2.0** (fluxo de código de autorização) para o usuário conceder acesso uma vez.
+3. **Microsoft Graph** para listar e baixar os arquivos da pasta.
+4. **Um componente no servidor** — hook do PocketBase — porque o segredo do cliente e o token de
+   atualização **não podem** ficar no navegador. Este é o ponto que mais gente erra.
+
+### Passo 1 — o que só o usuário pode fazer (antes de qualquer prompt)
+
+No portal do Azure (`portal.azure.com`), com a conta Microsoft do OneDrive:
+
+1. **Microsoft Entra ID → Registros de aplicativo → Novo registro**
+   - Nome: `Painel MPE`
+   - Tipos de conta com suporte: *Contas em qualquer diretório organizacional e contas pessoais
+     da Microsoft* (o OneDrive pessoal exige a opção que inclui contas pessoais).
+   - URI de Redirecionamento: tipo **Web**, valor `https://SEU-DOMINIO/onedrive/callback`
+     (substituir pelo domínio real do painel publicado).
+2. Anotar, na tela de visão geral: **ID do aplicativo (cliente)** e **ID do diretório (locatário)**.
+3. **Certificados e segredos → Novo segredo do cliente**. Copiar o **Valor** na hora — ele só
+   aparece uma vez.
+4. **Permissões de API → Adicionar → Microsoft Graph → Permissões delegadas**:
+   `Files.Read`, `offline_access`, `User.Read`. Conceder consentimento.
+
+### O que trazer de volta
+
+- ID do aplicativo (cliente) — pode ser dito em texto, não é secreto.
+- ID do diretório (locatário).
+- A URL exata do painel publicado, para conferir o URI de redirecionamento.
+- O **segredo do cliente NÃO** deve ser colado em nenhuma conversa. Ele vai direto para a
+  variável de ambiente do projeto, no painel da Hostinger.
+
+### Regras da implementação (para o prompt, depois)
+
+- Segredo do cliente e token de atualização vivem **apenas** no servidor (hook do PocketBase),
+  nunca no código do navegador, nunca em `localStorage`.
+- Token de atualização guardado em coleção própria, com API rules restritas ao dono.
+- Escopo `Files.Read` apenas. Nada de `Files.ReadWrite`, que não é necessário para ler.
+- A pasta é fixada por configuração, não por busca no drive inteiro.
+- Uma tela de "Conectar ao OneDrive" em Configurações, com botão de desconectar que apaga o token.
+
+### Quando fazer
+
+**Depois** de fechar os itens 1 a 5 da auditoria — em especial o item 5 (bloqueios de autenticação
+antigos). Construir uma integração de autenticação nova em cima de dois caminhos de login
+convivendo é a receita para um defeito que ninguém acha depois.

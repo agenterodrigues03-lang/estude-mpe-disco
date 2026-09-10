@@ -16,10 +16,13 @@ no chat do Horizons.
 Situação confirmada com o usuário:
 
 - [x] O login ("Entrar / Criar agora") **já está funcionando**.
-- [x] O projeto **já tem tabelas** no Supabase (quais, ainda não sabemos).
+- [x] O banco do projeto **não é Supabase: é PocketBase**. Não há SQL — há *coleções*, e o
+      controle de acesso se faz por **API rules**, não por RLS.
+- [x] As quatro coleções novas já foram criadas: `mpe_planos`, `mpe_blocos`,
+      `mpe_sessoes_questoes`, `mpe_caderno_erros`. O projeto passou a ter 12 coleções.
 
-Por isso, todas as tabelas novas usam o prefixo `mpe_`: elimina qualquer risco de colisão de nome
-com o que já existe, sem precisar auditar o banco antes.
+O prefixo `mpe_` foi mantido: elimina qualquer risco de colisão com as 8 coleções que já existiam,
+sem precisar auditar o banco antes.
 
 ### Caminho B — eu mesmo escrevo o código
 Aí preciso de:
@@ -33,8 +36,11 @@ Aí preciso de:
    Anexo A e você revisa antes de publicar.
 
 ### O que já sei do ambiente
-- Hostinger **Horizons** gera app **React + Vite + TailwindCSS + shadcn/ui**, com **Supabase** para
-  banco e autenticação. Os prompts abaixo já assumem essa stack.
+- Hostinger **Horizons** gera app **React + Vite + TailwindCSS + shadcn/ui**. O banco e a
+  autenticação deste projeto rodam em **PocketBase** (não Supabase). Os prompts abaixo assumem
+  essa stack.
+- Em PocketBase: *coleção* no lugar de tabela, *record* no lugar de linha, **API rules** no lugar
+  de RLS, e os campos `id`, `created` e `updated` são gerados automaticamente.
 - O botão **Publicar** (canto superior direito) é o que joga a versão para o domínio.
 
 ---
@@ -77,74 +83,100 @@ Regras para todas as suas próximas respostas:
 - Mobile-first: eu uso este app quase sempre pelo celular.
 
 Não altere nada ainda. Apenas confirme que entendeu e me diga o que já existe hoje no projeto
-(páginas, tabelas no Supabase e se o login já está funcional).
+(páginas, coleções no banco e se o login já está funcional).
 ```
 
 ---
 
-### PROMPT 1 — Estrutura de dados (Supabase)
+### PROMPT 1 — Estrutura de dados (PocketBase)
 
 ```
 IMPORTANTE — leia antes de executar:
-- NÃO altere, renomeie nem apague nenhuma tabela, coluna ou política que já exista no projeto.
-- O login já funciona: use a autenticação existente, não crie outra.
-- Crie apenas tabelas NOVAS, todas com o prefixo mpe_, usando CREATE TABLE IF NOT EXISTS.
-- Se alguma dessas tabelas já existir, pare e me avise em vez de alterar.
+- NÃO altere, renomeie nem apague nenhuma coleção, campo ou regra que já exista no projeto.
+- O login já funciona: use a coleção de autenticação existente, não crie outra.
+- Crie apenas coleções NOVAS, todas com o prefixo mpe_.
+- Se alguma dessas coleções já existir, pare e me avise em vez de alterar.
 
-Crie no Supabase as tabelas abaixo, com RLS (Row Level Security) ativada e políticas que permitam
-a cada usuário ler e escrever APENAS as próprias linhas (comparando user_id com auth.uid()).
+Crie as coleções abaixo. Em todas elas, o campo user_id é uma RELAÇÃO (relation) para a coleção
+de autenticação do projeto, obrigatória, com maxSelect 1 e cascadeDelete ativado.
+Em todas as quatro, as cinco API rules (list, view, create, update, delete) devem ser
+exatamente: user_id = @request.auth.id
+Isso garante que cada usuário só enxerga e altera os próprios registros.
+Não repita os campos id, created e updated: o PocketBase já os cria sozinho.
 
 1) mpe_planos
-   - id (uuid, pk)
-   - user_id (uuid, referência a auth.users)
+   - user_id (relation -> coleção de autenticação, obrigatório)
    - titulo (text)
-   - ciclo_atual (int, default 1)
-   - semana_atual (int, default 1)
-   - fase_atual (int, default 1)
-   - total_fases (int, default 5)
-   - nivel_inicial (numeric, default 50)     -- % de acertos do diagnóstico
-   - meta_ciclo (numeric, default 55)        -- % alvo
-   - meta_semana (int, default 8)
-   - horizonte (text, default '18-30m')
-   - created_at (timestamptz, default now())
+   - ciclo_atual (number, padrão 1)
+   - semana_atual (number, padrão 1)
+   - fase_atual (number, padrão 1)
+   - total_fases (number, padrão 5)
+   - nivel_inicial (number, padrão 50)     // % de acertos do diagnóstico
+   - meta_ciclo (number, padrão 55)        // % alvo
+   - meta_semana (number, padrão 8)
+   - horizonte (text, padrão "18-30m")
 
 2) mpe_blocos
-   - id (uuid, pk)
-   - user_id (uuid)
-   - plano_id (uuid, referência a mpe_planos)
-   - ciclo (int), semana (int)
-   - dia_semana (int)          -- 1 = segunda ... 6 = sábado
-   - ordem (int)               -- posição do bloco dentro do dia
-   - duracao_horas (numeric)   -- 1 ou 2
-   - tipo (text)               -- 'lei_seca' | 'questoes' | 'caderno' | 'g7_pos' | 'simulado' | 'revisao'
+   - user_id (relation -> coleção de autenticação, obrigatório)
+   - plano_id (relation -> mpe_planos, maxSelect 1)
+   - ciclo (number), semana (number)
+   - dia_semana (number)        // 1 = segunda ... 6 = sábado
+   - ordem (number)             // posição do bloco dentro do dia
+   - duracao_horas (number)     // 1 ou 2
+   - tipo (select, valores: lei_seca, questoes, caderno, g7_pos, simulado, revisao)
    - disciplina (text)
-   - descricao (text)
-   - concluido (boolean, default false)
-   - concluido_em (timestamptz, null)
+   - descricao (editor ou text)
+   - concluido (bool, padrão falso)
+   - concluido_em (date, opcional)
 
 3) mpe_sessoes_questoes
-   - id (uuid, pk)
-   - user_id (uuid)
+   - user_id (relation -> coleção de autenticação, obrigatório)
    - data (date)
    - disciplina (text)
    - banca (text)
-   - total (int)
-   - acertos (int)
-   - observacoes (text)
+   - total (number)
+   - acertos (number)
+   - observacoes (text, opcional)
 
 4) mpe_caderno_erros
-   - id (uuid, pk)
-   - user_id (uuid)
-   - data (date, default hoje)
+   - user_id (relation -> coleção de autenticação, obrigatório)
+   - data (date)
    - disciplina (text)
    - tema (text)
-   - erro (text)              -- o que eu errei
-   - correcao (text)          -- o entendimento correto
-   - fonte (text)             -- lei, súmula, informativo
-   - revisado_em (date, null)
+   - erro (editor)              // o que eu errei
+   - correcao (editor)          // o entendimento correto
+   - fonte (text)               // lei, súmula, informativo
+   - revisado_em (date, opcional)
 
 Não crie nenhuma tela ainda. Só o banco e as políticas de segurança.
-Depois me mostre o SQL que foi executado.
+Depois me mostre, para cada coleção criada, a lista de campos com seus tipos e as cinco API rules.
+```
+
+---
+
+### PROMPT 1-B — Conferência das regras de acesso (não pule)
+
+> Por que existe: o construtor confirmou que criou as coleções "com regras de acesso restrito ao
+> próprio usuário", mas não mostrou as regras. Em PocketBase, uma coleção com API rule vazia
+> (`null`) fica acessível só ao admin, e uma com rule `""` fica **aberta a qualquer um**. A
+> diferença entre as duas é invisível na conversa e decisiva no ar. Confira antes de seguir.
+
+```
+Antes de criarmos qualquer tela, preciso conferir a segurança do que você acabou de criar.
+
+Para cada uma das quatro coleções (mpe_planos, mpe_blocos, mpe_sessoes_questoes,
+mpe_caderno_erros), me mostre em uma tabela:
+
+1. o nome de cada campo e seu tipo;
+2. o valor EXATO das cinco API rules (listRule, viewRule, createRule, updateRule, deleteRule),
+   copiado literalmente — se alguma estiver vazia ou nula, diga "vazia" ou "nula", não escreva
+   uma descrição do que ela deveria fazer;
+3. para qual coleção o campo user_id aponta.
+
+Se alguma das cinco regras de alguma coleção NÃO for exatamente `user_id = @request.auth.id`,
+corrija agora para esse valor e me diga o que estava antes.
+
+Não crie nenhuma tela ainda.
 ```
 
 ---
@@ -208,7 +240,7 @@ levemente arredondados, contendo:
   "A semana inteira, bloco a bloco, está na aba Semana 1 · bloco a bloco." (com "Semana 1 ·
   bloco a bloco" em negrito).
 
-Os blocos devem vir da tabela "mpe_blocos" do Supabase, filtrando pelo ciclo e semana atuais do
+Os blocos devem vir da coleção "mpe_blocos" do PocketBase, filtrando pelo ciclo e semana atuais do
 plano do usuário e pelo dia da semana de hoje, ordenados pelo campo "ordem".
 Se não houver blocos cadastrados para hoje, mostre uma mensagem discreta:
 "Nenhum bloco cadastrado para hoje. Cadastre a semana na aba Semana 1 · bloco a bloco."
@@ -223,7 +255,7 @@ Se não houver blocos cadastrados para hoje, mostre uma mensagem discreta:
 > lógica (lei seca → questões → dois cadernos → G7/Pós), com o peso que MP costuma cobrar.
 
 ```
-Crie uma rotina de carga inicial (seed) que insira na tabela "mpe_blocos" os blocos do Ciclo 1,
+Crie uma rotina de carga inicial (seed) que crie na coleção "mpe_blocos" os registros do Ciclo 1,
 Semana 1, para o usuário logado — e que não duplique se já existirem blocos daquela semana.
 
 Cole aqui o conteúdo do Anexo A (os seis dias, bloco a bloco).
@@ -248,7 +280,7 @@ Mostre os seis dias (segunda a sábado) como uma lista vertical de seções. Par
   - a duração e o tipo em negrito;
   - a descrição;
   - quando marcado, o texto fica cinza e riscado.
-- Marcar ou desmarcar a caixa deve gravar imediatamente no Supabase (campos "concluido" e
+- Marcar ou desmarcar a caixa deve gravar imediatamente no PocketBase (campos "concluido" e
   "concluido_em") e refletir na aba "Hoje", sem recarregar a página.
 
 No topo da aba, uma barra de progresso fina mostrando "X de Y blocos concluídos nesta semana"
@@ -335,7 +367,7 @@ Preencha a aba "Caderno de erros".
 3) No topo, três contadores: total de erros registrados, erros nunca revisados e a disciplina
    com mais erros no período — esta última com o rótulo "Sua maior fraqueza agora".
 
-Tudo gravado no Supabase, na tabela mpe_caderno_erros, apenas para o usuário logado.
+Tudo gravado no PocketBase, na coleção mpe_caderno_erros, apenas para o usuário logado.
 ```
 
 ---
@@ -346,7 +378,7 @@ Tudo gravado no Supabase, na tabela mpe_caderno_erros, apenas para o usuário lo
 Agora torne o rodapé de indicadores dinâmico:
 
 - "NÍVEL ATUAL" deixa de ser fixo: passa a mostrar o percentual de acertos das últimas 10 sessões
-  registradas na tabela mpe_sessoes_questoes (soma de acertos dividida pela soma de total).
+  registradas na coleção mpe_sessoes_questoes (soma de acertos dividida pela soma de total).
   Se não houver nenhuma sessão registrada, mostre o nivel_inicial do plano (50%) e mantenha a
   legenda "diagnóstico inicial"; havendo sessões, a legenda passa a ser "últimas 10 sessões".
 - "META DO CICLO", "FASE" e "HORIZONTE" vêm dos campos do plano no banco.
@@ -365,9 +397,9 @@ Faça o acabamento da página /plano, sem alterar o conteúdo:
 
 1. Verifique que tudo funciona em tela de 390px de largura: as abas rolam horizontalmente sem
    quebrar o layout, nenhum texto vaza e nada exige rolagem lateral da página inteira.
-2. Estados de carregamento: enquanto os dados do Supabase carregam, mostre esqueletos de conteúdo,
+2. Estados de carregamento: enquanto os dados do PocketBase carregam, mostre esqueletos de conteúdo,
    nunca a tela em branco.
-3. Mensagens de erro amigáveis se o Supabase falhar.
+3. Mensagens de erro amigáveis se o PocketBase falhar ou o usuário perder a sessão.
 4. A página deve funcionar bem com a tela do celular no modo escuro.
 5. Adicione o título da aba do navegador como "Plano de estudos · Painel MPE".
 
@@ -447,7 +479,7 @@ Se não der, não faça.
 - [ ] Consigo entrar com meu e-mail e senha e a página /plano abre.
 - [ ] A aba "Hoje" mostra o dia correto da semana.
 - [ ] Marco um bloco como concluído, fecho o app, abro de novo e ele continua marcado.
-- [ ] Um segundo usuário de teste não vê nada dos meus dados (teste a RLS).
+- [ ] Um segundo usuário de teste não vê nada dos meus dados (teste as API rules).
 - [ ] A página inteira funciona no celular sem rolagem lateral.
 - [ ] O registro de sessão de questões altera o indicador "NÍVEL ATUAL".
 - [ ] O caderno de erros grava e lista corretamente.

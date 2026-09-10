@@ -693,3 +693,23 @@ Isso muda três itens — e não muda os dois primeiros.
 7. `carregarDados` sem tratamento de erro (Médio).
 8. Avisos de `useEffect` (Baixo).
 9. `contact_form` órfã (Baixo).
+
+### Andamento
+
+**Item 1 — senha de admin em migração: RESOLVIDO.**
+- Arquivo `apps/pocketbase/pb_migrations/1789065011_create_definitive_admin.js`, linhas 20 e 63:
+  senha removida e substituída por `MPE_ADMIN_PASSWORD` e `MPE_DEMO_PASSWORD`, com interrupção
+  da execução se as variáveis não estiverem definidas.
+- Descoberta relevante: a credencial exposta era a da **conta de login do próprio painel**, não a
+  do superusuário do PocketBase. São contas diferentes.
+- O painel não tinha tela para trocar a senha da própria conta. Foi criada em
+  Configurações → Perfil → "Alterar senha", exigindo a senha atual.
+- Senha trocada pelo usuário em 10/09/2026.
+
+**Pendente de confirmação:** as credenciais nas outras três migrações
+(`1789047573_seed_biblioteca_test_docs.js`, `1789050400_create_mpe_dados_estudo.js`,
+`1789056600_create_mpe_discursivas.js`) e na documentação foram limpas? A varredura final do
+projeto não foi reportada. Cobrar antes de publicar.
+
+**Também sem resposta:** a conta de demonstração de `MPE_DEMO_PASSWORD` ainda existe e consegue
+fazer login? Entra junto com o item 3 (fechar o cadastro público).

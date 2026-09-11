@@ -98,11 +98,11 @@ repetíveis, comando para ações rápidas do dia a dia.
    aprova, só então ele executa. Evita retrabalho caro.
 2. **`/clear` entre assuntos.** Contexto sujo é a principal causa de resposta ruim.
    Terminou Penal e vai para Constitucional? `/clear`.
-3. **Dê critério de aceite.** Não peça "melhora o painel". Peça: "na tela Meu Dia,
+3. **Aponte o arquivo.** "Ajuste `03-direito-constitucional/04-controle.../adi.md`"
+   rende muito mais que "ajuste o resumo de ADI". Use `@` para autocompletar o caminho.
+4. **Dê critério de aceite.** Não peça "melhora o painel". Peça: "na tela Meu Dia,
    as tarefas concluídas devem sumir da lista principal e aparecer num contador
    no rodapé".
-4. **Aponte o arquivo.** "Ajuste `03-direito-constitucional/04-controle.../adi.md`"
-   rende muito mais que "ajuste o resumo de ADI".
 5. **Peça revisão do próprio trabalho**: "releia o que você escreveu e marque o que
    não tem certeza". Funciona bem e pega erro de jurisprudência.
 

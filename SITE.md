@@ -1,97 +1,142 @@
-# 🌐 Painel MPE — situação, plataforma e plano de migração
+# 🌐 Painel MPE — arquitetura, riscos e decisão de migração
 
-## 1. Identificação da plataforma ✅
+## 1. Identificação
 
 - **URL:** https://painel.rodriguesmodafeminina.com/painel-mpe/meu-dia
-- **Hospedagem: Hostinger** — confirmado por DNS:
-  - `www.rodriguesmodafeminina.com` → CNAME → `connect.hostinger.com` → `connect.hstgr.net`
-  - `painel.rodriguesmodafeminina.com` → `195.35.60.235`, `191.101.104.25`
-    (mesmos blocos `195.35.60.0/24` e `191.101.104.0/24` do domínio principal)
-
-Ou seja: **não** é Lovable, Bolt, v0 ou Replit — essas ferramentas servem a partir
-da infraestrutura própria delas. Está tudo na Hostinger.
-
-> Não foi possível inspecionar o HTML da página: o domínio é bloqueado pela política
-> de rede desta sessão (403 no proxy de egresso). A identificação acima veio de DNS.
-
-### Falta confirmar: como o painel foi construído
-
-| Hipótese | Como confirmar no hPanel | Como extrair o código |
-|---|---|---|
-| **Hostinger Horizons** (construtor com IA) | O projeto aparece em *Horizons / AI Builder* | Exportar código → ZIP (React + Vite) |
-| **Upload manual** (arquivos estáticos/PHP) | Só aparece em *Hospedagem* | Gerenciador de Arquivos → compactar `public_html` → baixar |
-
-A rota `/painel-mpe/meu-dia` sugere uma SPA com roteamento — compatível com as duas.
+- **Hospedagem:** Hostinger (confirmado por DNS — CNAME `connect.hostinger.com`)
+- **Construído em:** Hostinger Horizons (construtor com IA)
+- **Finalidade:** painel pessoal de estudos, acesso restrito por login
 
 ---
 
-## 2. Limitações conhecidas do Hostinger Horizons
+## 2. Stack real (diagnóstico do próprio Horizons)
 
-Se o painel foi feito no Horizons, é preciso saber **antes** de exportar:
-
-- A exportação é **via de mão única**: o código editado **não volta** para o Horizons.
-  Depois da migração, o desenvolvimento continua no GitHub + Claude Code — o modo
-  "pedir por prompt dentro do Horizons" deixa de valer para esse projeto.
-- O Horizons **não** importa código do GitHub e **não** tem sincronização bidirecional.
-- A exportação exige plano Hobbyist ou superior.
-
-Para o objetivo declarado (usar o Claude Code para melhorar o painel), essa troca
-é vantajosa: perde-se o prompt dentro do Horizons e ganha-se histórico, revisão de
-diff, possibilidade de desfazer e um agente que enxerga o projeto inteiro.
-
----
-
-## 2.1 Risco principal: onde moram os dados
-
-Antes de exportar, é obrigatório saber **onde o painel grava os dados** (atividades,
-agenda, caderno de erros, progresso).
-
-| Cenário | Consequência na migração |
+| Camada | Tecnologia |
 |---|---|
-| `localStorage` do navegador | Simples. O código é tudo o que existe; o ZIP basta. |
-| Banco gerenciado pela plataforma | O ZIP traz o código, **não traz os dados**. O painel exportado sobe vazio ou quebrado, apontando para um backend deixado para trás. |
+| Front-end | React 18.3.1 (JavaScript/JSX) |
+| Build | Vite 7.3.6 · `npm run build` → `dist/apps/web` |
+| Estilos | Tailwind CSS |
+| Componentes | Radix UI · lucide-react · framer-motion |
+| Formulários | react-hook-form + zod |
+| Datas / gráficos | date-fns · Recharts |
+| **Backend** | **PocketBase** (gerenciado pela plataforma) |
 
-No segundo cenário é preciso, antes de trocar o endereço do site: exportar os dados
-à parte, decidir onde eles passarão a morar e ajustar o código para o novo destino.
+### Estrutura
 
-Diferença prática: uma migração de uma tarde contra uma de um fim de semana.
+```
+apps/
+├── web/src/
+│   ├── App.jsx
+│   └── pages/painel-mpe/
+│       ├── pages/          ← PlanejamentoIntegradoPage.jsx, MeuDiaPage.jsx
+│       ├── componentes/
+│       └── layout e estilos
+└── pocketbase/
+    ├── pb_migrations/
+    └── hooks/
+```
+
+### Rotas
+
+Mais de 30 rotas internas. As relevantes por ora:
+
+- `/painel-mpe/planejamento-integrado` → `PlanejamentoIntegradoPage.jsx`
+- `/painel-mpe/meu-dia` → `MeuDiaPage.jsx`
+- `/` → login; autenticado, redireciona para `/painel-mpe/meu-dia`
+
+Outras áreas: centro-de-comando, agenda-semanal, ciclo-de-estudos, estudo-ativo,
+biblioteca-juridica, mentora-mpe, desempenho, simulados, discursiva, prova-oral,
+relatorios, roi, configuracoes.
+
+### Dados e autenticação
+
+- Tudo no **PocketBase**: usuários, agenda, planos e blocos, questões, discursivas,
+  interações de IA, documentos.
+- `localStorage` apenas para o estado do estudo em andamento (`mpe_em_andamento`).
+- Login por coleção `users` do PocketBase, sessão persistente, rotas protegidas,
+  acesso restrito a perfil administrativo.
+
+> Observação: o diagnóstico veio com ruído de tradução automática — "recálculos"
+> é Recharts, "data-fns" é date-fns, "CEP de exportação" é o ZIP.
 
 ---
 
-## 3. Publicação depois da migração
+## 3. O que a exportação traz — e o que não traz
 
-A Hostinger tem deploy a partir do GitHub: **hPanel → Avançado → Git →
-"Connect with GitHub"** (OAuth, instala o GitHub App), escolhe repositório e branch.
-Cada `push` no branch conectado dispara deploy automático via webhook.
+| Vai no ZIP | **Não** vai no ZIP |
+|---|---|
+| Código da aplicação web | Arquivos `.env` |
+| Páginas, componentes, estilos, utilitários | Senhas e chaves |
+| Configurações do projeto | Registros de usuários |
+| Migrações do PocketBase | **Dados do PocketBase** |
+| | Uploads e arquivos |
+| | Banco em produção e backups |
 
-### ⚠️ Armadilha técnica que precisa ser resolvida
-
-**O deploy da Hostinger não roda build.** Ele serve exatamente o que está no
-repositório. Um projeto React/Vite exportado do Horizons **não funciona** se for
-publicado como está — ele precisa de `npm run build`, que gera a pasta `dist/`.
-
-Duas saídas:
-
-- **Simples:** versionar a pasta `dist/` já compilada e apontar o deploy para ela.
-- **Correta:** GitHub Actions roda o build a cada push e publica o resultado em um
-  branch dedicado (ex.: `deploy`); a Hostinger observa esse branch.
-
-Recomendação: começar pela simples para fechar o ciclo rápido e migrar para a
-correta depois que o fluxo estiver funcionando.
+**Consequência direta:** o código exportado sobe vazio. Todo o seu histórico de
+estudo — agenda, erros, questões, discursivas — fica para trás sem um backup
+separado do PocketBase.
 
 ---
 
-## 4. Plano de migração
+## 4. Os dois bloqueios reais
 
-| # | Passo | Quem faz |
+### Bloqueio 1 — o PocketBase é um servidor, não um arquivo
+
+A hospedagem compartilhada da Hostinger serve arquivos e não roda build. Ela dá
+conta do front-end compilado (`dist/apps/web`), mas **não** roda o PocketBase, que
+é um processo de servidor. Hospedar por conta própria exige VPS ou equivalente.
+
+Hoje quem roda esse servidor é a plataforma. Ao exportar, essa responsabilidade
+passa a ser sua.
+
+### Bloqueio 2 — acesso ao backup dos dados
+
+É preciso confirmar se há acesso ao painel administrativo do PocketBase para baixar
+um backup completo. Sem isso, os dados ficam presos na plataforma.
+
+---
+
+## 5. A decisão
+
+A exportação do Horizons é de mão única: não há sincronização e não se importa
+código de volta. Portanto não existe cenário em que o Horizons e o Claude Code
+trabalhem no mesmo projeto.
+
+| | Ficar no Horizons | Migrar para o GitHub |
 |---|---|---|
-| 1 | Confirmar no hPanel se o painel é Horizons ou upload manual | **Você** |
-| 2 | Exportar/baixar o código em ZIP | **Você** |
-| 3 | Enviar o ZIP para o Google Drive (já conectado a esta sessão) | **Você** |
-| 4 | Baixar o ZIP, criar o repositório `painel-mpe`, commitar o código | Claude Code |
-| 5 | Analisar a stack e documentar em `CLAUDE.md` do novo repositório | Claude Code |
-| 6 | Configurar o build e o deploy automático | Claude Code + você no hPanel |
-| 7 | Ciclo aberto: você pede → eu altero → você revisa o diff → publica | Ambos |
+| Quem altera o código | Horizons, por prompt | Claude Code, com diff e histórico |
+| Infraestrutura | Da plataforma | Sua (VPS, backups, atualizações) |
+| Custo de operação | Nenhum | Real e contínuo |
+| Escala do projeto | Piora conforme cresce | Melhora conforme cresce |
+
+---
+
+## 6. Sequência recomendada
+
+**1. Backup do PocketBase — fazer agora, independe de qualquer decisão.**
+Hoje os dados existem em um lugar só. Se a plataforma falhar, o histórico de estudo
+vai junto. O backup não compromete com nada e elimina o risco maior.
+
+**2. Registrar as variáveis de ambiente em gerenciador de senhas.**
+`MPE_ADMIN_PASSWORD`, `MPE_DEMO_PASSWORD`, `PB_ENCRYPTION_KEY`, `PB_SUPERUSER_*`,
+`BUILDER_MAILER_*`. Sem `PB_ENCRYPTION_KEY` o backup pode ficar inutilizável.
+**Nunca commitar esses valores. `.env` sempre no `.gitignore`.**
+
+**3. Aplicar os lotes de layout no Horizons.**
+Não dependem da migração e o painel fica melhor de imediato.
+
+**4. Migrar quando houver tempo dedicado.**
+Exportar, subir ao GitHub, montar o VPS, apontar o domínio. Não é tarefa de
+intervalo entre um estudo e outro.
+
+---
+
+## 7. Publicação depois da migração
+
+- Front-end: `npm run build` → `dist/apps/web`. A Hostinger **não roda build**;
+  o build sai do GitHub Actions ou vai versionado.
+- PocketBase: processo de servidor, exige VPS.
+- Deploy via GitHub: hPanel → Avançado → Git (hospedagem) ou GitHub Actions (VPS).
 
 ---
 
@@ -99,5 +144,5 @@ correta depois que o fluxo estiver funcionando.
 
 - [Hostinger — Deploy de repositório Git](https://www.hostinger.com/support/1583302-how-to-deploy-a-git-repository-in-hostinger/)
 - [Hostinger Docs — Git](https://docs.hostinger.com/websites/git)
+- [Hostinger — Deploy em VPS com GitHub Actions](https://www.hostinger.com/support/deploy-to-hostinger-vps-using-github-actions/)
 - [Hostinger — Como exportar o código do Horizons](https://www.hostinger.com/support/10771345-hostinger-horizons-how-to-export-code/)
-- [Hostinger Horizons — Perguntas frequentes](https://www.hostinger.com/support/10673155-hostinger-horizons-frequently-asked-questions/)

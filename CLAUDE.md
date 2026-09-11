@@ -100,14 +100,18 @@ Nomes de arquivo: minúsculas, sem acento, separados por hífen
 
 **Painel MPE:** https://painel.rodriguesmodafeminina.com/painel-mpe/meu-dia
 
-O código-fonte do painel **não está neste repositório** — hoje vive em plataforma
-externa (fora do Git). Enquanto essa situação não mudar, o Claude Code não consegue
-editá-lo diretamente: só produzir trechos para colagem manual.
+Aplicação full-stack construída no Hostinger Horizons e hospedada na Hostinger:
+React 18 + Vite + Tailwind no front (`npm run build` → `dist/apps/web`) e
+**PocketBase** como backend, hoje gerenciado pela plataforma.
 
-Situação completa e rotas de solução: ver `SITE.md`.
+O código-fonte **não está neste repositório**. Enquanto não estiver, o Claude Code
+não consegue editá-lo: só produzir prompts para o Horizons ou trechos para colagem.
 
-Quando o código for trazido para o Git, atualizar esta seção com: stack, comando de
-build, comando de publicação e onde fica o conteúdo.
+Arquitetura completa, riscos de migração e a decisão pendente: ver `SITE.md`.
+
+**Regra de segurança:** as variáveis de ambiente do painel (`PB_ENCRYPTION_KEY`,
+`PB_SUPERUSER_*`, `MPE_ADMIN_PASSWORD`, `BUILDER_MAILER_*`) nunca devem ser
+coladas em conversa nem commitadas. `.env` sempre no `.gitignore`.
 
 ---
 

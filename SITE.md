@@ -41,6 +41,23 @@ diff, possibilidade de desfazer e um agente que enxerga o projeto inteiro.
 
 ---
 
+## 2.1 Risco principal: onde moram os dados
+
+Antes de exportar, é obrigatório saber **onde o painel grava os dados** (atividades,
+agenda, caderno de erros, progresso).
+
+| Cenário | Consequência na migração |
+|---|---|
+| `localStorage` do navegador | Simples. O código é tudo o que existe; o ZIP basta. |
+| Banco gerenciado pela plataforma | O ZIP traz o código, **não traz os dados**. O painel exportado sobe vazio ou quebrado, apontando para um backend deixado para trás. |
+
+No segundo cenário é preciso, antes de trocar o endereço do site: exportar os dados
+à parte, decidir onde eles passarão a morar e ajustar o código para o novo destino.
+
+Diferença prática: uma migração de uma tarde contra uma de um fim de semana.
+
+---
+
 ## 3. Publicação depois da migração
 
 A Hostinger tem deploy a partir do GitHub: **hPanel → Avançado → Git →

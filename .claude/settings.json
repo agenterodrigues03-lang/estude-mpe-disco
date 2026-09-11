@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git show:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(mkdir:*)",
+      "Read",
+      "Grep",
+      "Glob",
+      "Edit",
+      "Write",
+      "WebFetch(domain:www.planalto.gov.br)",
+      "WebFetch(domain:portal.stf.jus.br)",
+      "WebFetch(domain:www.stf.jus.br)",
+      "WebFetch(domain:www.stj.jus.br)",
+      "WebFetch(domain:scon.stj.jus.br)",
+      "WebFetch(domain:www.dizerodireito.com.br)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(rm -rf:*)",
+      "Read(./.env)",
+      "Read(./**/.env)",
+      "Read(./**/*.key)"
+    ]
+  }
+}
